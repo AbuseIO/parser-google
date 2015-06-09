@@ -1,0 +1,8 @@
+{
+    "name": "abuseio/parser-google",
+    "description": "Parser addon for handling notifications from google",
+    "require": {
+        "php": ">=5.4.0",
+        "another-vendor/package": "1.*"
+    }
+}
