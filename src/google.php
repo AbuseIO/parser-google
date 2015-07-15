@@ -46,22 +46,13 @@ class Google extends Parser
             $feed = (string)$report->attributes()->type;
 
             if (!isset($this->config['feeds'][$feed])) {
-
-                // Feed is not configured -> halt and catch fire
-                // Todo - Delete tempdir
                 return $this->failed("Detected feed ${feed} is unknown. No sense in trying to parse.");
-
             } else {
-
                 $feedConfig = $this->config['feeds'][$feed];
-
             }
 
             if ($feedConfig['enabled'] !== true) {
-
-                // Feed is disabled -> die with grace
-                // Todo - Delete tempdir
-                return $this->failed(
+                return $this->success(
                     "Detected feed ${feed} has been disabled by configuration. No sense in trying to parse."
                 );
 
@@ -105,21 +96,21 @@ class Google extends Parser
                 }
 
                 $infoBlob = array(
-                    'scheme' => $url_info['scheme'],
-                    'port' => $url_info['port'],
-                    'domain' => $url_info['domain'],
-                    'uri' => $url_info['path'],
+                    'scheme'        => $url_info['scheme'],
+                    'port'          => $url_info['port'],
+                    'domain'        => $url_info['domain'],
+                    'uri'           => $url_info['path'],
                 );
 
                 $event = [
-                    'source' => $this->config['parser']['name'],
-                    'ip' => $url_info['ip'],
-                    'domain' => $url_info['domain'],
-                    'uri' => $url_info['path'],
-                    'class' => $feedConfig['class'],
-                    'type' => $feedConfig['type'],
-                    'timestamp' => $timestamp,
-                    'information' => json_encode($infoBlob),
+                    'source'        => $this->config['parser']['name'],
+                    'ip'            => $url_info['ip'],
+                    'domain'        => $url_info['domain'],
+                    'uri'           => $url_info['path'],
+                    'class'         => $feedConfig['class'],
+                    'type'          => $feedConfig['type'],
+                    'timestamp'     => $timestamp,
+                    'information'   => json_encode($infoBlob),
                 ];
 
                 $events[] = $event;
