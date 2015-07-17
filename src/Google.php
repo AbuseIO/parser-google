@@ -2,7 +2,6 @@
 
 namespace AbuseIO\Parsers;
 
-use AbuseIO\Parsers\Parser;
 use Ddeboer\DataImport\Reader;
 use Ddeboer\DataImport\Writer;
 use Ddeboer\DataImport\Filter;
@@ -15,45 +14,46 @@ class Google extends Parser
 {
     public $parsedMail;
     public $arfMail;
-    public $config;
 
-    public function __construct($parsedMail, $arfMail, $config = false)
+    /**
+     * Create a new Google instance
+     */
+    public function __construct($parsedMail, $arfMail)
     {
-        $this->configFile = __DIR__ . '/../config/' . basename(__FILE__);
-        $this->config = $config;
         $this->parsedMail = $parsedMail;
         $this->arfMail = $arfMail;
-
     }
 
+    /**
+     * Parse attachments
+     * @return Array    Returns array with failed or success data
+     *                  (See parser-common/src/Parser.php) for more info.
+     */
     public function parse()
     {
-
         Log::info(
             get_class($this). ': Received message from: '.
             $this->parsedMail->getHeader('from') . " with subject: '" .
             $this->parsedMail->getHeader('subject') . "' arrived at parser: " .
-            $this->config['parser']['name']
+            config('Google.parser.name')
         );
 
-        $events = [ ] ;
-
+        $events         = [ ] ;
         $xml            = simplexml_load_string($this->parsedMail->getMessageBody());
         $timestamp      = strtotime($xml->attributes()->date);
 
         foreach ($xml->list as $report) {
+            $feedName = (string)$report->attributes()->type;
 
-            $feed = (string)$report->attributes()->type;
-
-            if (!isset($this->config['feeds'][$feed])) {
-                return $this->failed("Detected feed ${feed} is unknown. No sense in trying to parse.");
-            } else {
-                $feedConfig = $this->config['feeds'][$feed];
+            if (empty(config("Abusehub.feeds.{$feedName}"))) {
+                return $this->failed(
+                    "Detected feed '{$feedName}' is unknown."
+                );
             }
 
-            if ($feedConfig['enabled'] !== true) {
+            if (config("Google.feeds.{$feedName}.enabled") !== true) {
                 return $this->success(
-                    "Detected feed ${feed} has been disabled by configuration. No sense in trying to parse."
+                    "Detected feed '{$feedName}' has been disabled by configuration."
                 );
 
             }
@@ -73,7 +73,7 @@ class Google extends Parser
 
                     if (filter_var($url_info['host'], FILTER_VALIDATE_IP) === true) {
                         $url_info['ip'] = $url_info['host'];
-                        $url_info['domain'] = "";
+                        $url_info['domain'] = '';
                     } else {
                         $url_info['ip'] = gethostbyname($url_info['host']);
                         $url_info['domain'] = $url_info['host'];
@@ -83,16 +83,16 @@ class Google extends Parser
                     $url_info['domain'] = $url_info['host'];
                 }
 
-                if (!isset($url_info['port']) && $url_info['scheme'] == "http") {
-                    $url_info['port'] = "80";
-                } elseif (!isset($url_info['port']) && $url_info['scheme'] == "https") {
-                    $url_info['port'] = "443";
+                if (!isset($url_info['port']) && $url_info['scheme'] == 'http') {
+                    $url_info['port'] = 80;
+                } elseif (!isset($url_info['port']) && $url_info['scheme'] == 'https') {
+                    $url_info['port'] = 443;
                 } elseif (!isset($url_info['port'])) {
-                    $url_info['port'] = "";
+                    $url_info['port'] = '';
                 }
 
                 if (!isset($url_info['path'])) {
-                    $url_info['path'] = "/";
+                    $url_info['path'] = '/';
                 }
 
                 $infoBlob = array(
@@ -107,8 +107,8 @@ class Google extends Parser
                     'ip'            => $url_info['ip'],
                     'domain'        => $url_info['domain'],
                     'uri'           => $url_info['path'],
-                    'class'         => $feedConfig['class'],
-                    'type'          => $feedConfig['type'],
+                    'class'         => config("Google.feeds.{$feedName}.class"),
+                    'type'          => config("Google.feeds.{$feedName}.type"),
                     'timestamp'     => $timestamp,
                     'information'   => json_encode($infoBlob),
                 ];
