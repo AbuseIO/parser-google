@@ -45,7 +45,7 @@ class Google extends Parser
         foreach ($xml->list as $report) {
             $feedName = (string)$report->attributes()->type;
 
-            if (empty(config("Abusehub.feeds.{$feedName}"))) {
+            if (empty(config("Google.feeds.{$feedName}"))) {
                 return $this->failed(
                     "Detected feed '{$feedName}' is unknown."
                 );
