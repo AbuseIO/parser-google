@@ -93,6 +93,12 @@ class Google extends Parser
                     $url_info['port'] = '';
                 }
 
+                // If the domain is filled with an IP, we can keep the URI, but we dont consider it
+                // as a domain, else we'd be using ip contacts for domain names.
+                if (filter_var($url_info['domain'], FILTER_VALIDATE_IP) === true) {
+                    $url_info['domain'] = false;
+                }
+
                 if (!isset($url_info['path'])) {
                     $url_info['path'] = '/';
                 }
