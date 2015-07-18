@@ -35,7 +35,7 @@ class Google extends Parser
             get_class($this). ': Received message from: '.
             $this->parsedMail->getHeader('from') . " with subject: '" .
             $this->parsedMail->getHeader('subject') . "' arrived at parser: " .
-            config('Google.parser.name')
+            config('parsers.Google.parser.name')
         );
 
         $events         = [ ] ;
@@ -45,7 +45,7 @@ class Google extends Parser
         foreach ($xml->list as $report) {
             $feedName = (string)$report->attributes()->type;
 
-            if (empty(config("Google.feeds.{$feedName}"))) {
+            if (empty(config("parsers.Google.feeds.{$feedName}"))) {
                 return $this->failed(
                     "Detected feed '{$feedName}' is unknown."
                 );
@@ -54,7 +54,7 @@ class Google extends Parser
             // If the feed is disabled, then continue on to the next feed or attachment
             // its not a 'fail' in the sense we should start alerting as it was disabled
             // by design or user configuration
-            if (config("Google.feeds.{$feedName}.enabled") !== true) {
+            if (config("parsers.Google.feeds.{$feedName}.enabled") !== true) {
                 continue;
             }
 
@@ -103,12 +103,12 @@ class Google extends Parser
                 );
 
                 $event = [
-                    'source'        => config('Google.parser.name'),
+                    'source'        => config('parsers.Google.parser.name'),
                     'ip'            => $url_info['ip'],
                     'domain'        => $url_info['domain'],
                     'uri'           => $url_info['path'],
-                    'class'         => config("Google.feeds.{$feedName}.class"),
-                    'type'          => config("Google.feeds.{$feedName}.type"),
+                    'class'         => config("parsers.Google.feeds.{$feedName}.class"),
+                    'type'          => config("parsers.Google.feeds.{$feedName}.type"),
                     'timestamp'     => $timestamp,
                     'information'   => json_encode($infoBlob),
                 ];
