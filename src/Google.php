@@ -5,9 +5,6 @@ namespace AbuseIO\Parsers;
 use Ddeboer\DataImport\Reader;
 use Ddeboer\DataImport\Writer;
 use Ddeboer\DataImport\Filter;
-use Illuminate\Filesystem\Filesystem;
-use SplFileObject;
-use Uuid;
 use Log;
 use ReflectionClass;
 
