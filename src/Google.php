@@ -103,7 +103,7 @@ class Google extends Parser
                 );
 
                 $event = [
-                    'source'        => $this->config['parser']['name'],
+                    'source'        => config('Google.parser.name'),
                     'ip'            => $url_info['ip'],
                     'domain'        => $url_info['domain'],
                     'uri'           => $url_info['path'],
