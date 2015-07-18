@@ -73,9 +73,9 @@ class Google extends Parser
                 if (!filter_var($ip, FILTER_VALIDATE_IP) === true) {
                     // IP is within the URL we need
 
-                    if (filter_var($url_info['host'], FILTER_VALIDATE_IP) === true) {
+                    if (!filter_var($url_info['host'], FILTER_VALIDATE_IP) === false) {
                         $url_info['ip'] = $url_info['host'];
-                        $url_info['domain'] = '';
+                        $url_info['domain'] = false;
                     } else {
                         $url_info['ip'] = gethostbyname($url_info['host']);
                         $url_info['domain'] = $url_info['host'];
@@ -95,7 +95,7 @@ class Google extends Parser
 
                 // If the domain is filled with an IP, we can keep the URI, but we dont consider it
                 // as a domain, else we'd be using ip contacts for domain names.
-                if (filter_var($url_info['domain'], FILTER_VALIDATE_IP) === true) {
+                if (!filter_var($url_info['domain'], FILTER_VALIDATE_IP) === false) {
                     $url_info['domain'] = false;
                 }
 
