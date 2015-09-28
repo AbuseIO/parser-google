@@ -18,7 +18,10 @@ return [
             'type'      => 'Abuse',
             'enabled'   => true,
             'fields'    => [
-                //
+                'scheme',
+                'port',
+                'domain',
+                'path',
             ],
         ],
 
@@ -27,7 +30,10 @@ return [
             'type'      => 'Abuse',
             'enabled'   => true,
             'fields'    => [
-                //
+                'scheme',
+                'port',
+                'domain',
+                'path',
             ],
         ],
 
@@ -36,7 +42,10 @@ return [
             'type'      => 'Abuse',
             'enabled'   => true,
             'fields'    => [
-                //
+                'scheme',
+                'port',
+                'domain',
+                'path',
             ],
         ],
 
