@@ -5,21 +5,15 @@ namespace AbuseIO\Parsers;
 use Ddeboer\DataImport\Reader;
 use Ddeboer\DataImport\Writer;
 use Ddeboer\DataImport\Filter;
-use Log;
-use ReflectionClass;
 
 class Google extends Parser
 {
-    public $parsedMail;
-    public $arfMail;
-
     /**
      * Create a new Google instance
      */
     public function __construct($parsedMail, $arfMail)
     {
-        $this->parsedMail = $parsedMail;
-        $this->arfMail = $arfMail;
+        parent::__construct($parsedMail, $arfMail, $this);
     }
 
     /**
@@ -29,111 +23,86 @@ class Google extends Parser
      */
     public function parse()
     {
-        // Generalize the local config based on the parser class name.
-        $reflect = new ReflectionClass($this);
-        $this->configBase = 'parsers.' . $reflect->getShortName();
-
-        Log::info(
-            get_class($this). ': Received message from: '.
-            $this->parsedMail->getHeader('from') . " with subject: '" .
-            $this->parsedMail->getHeader('subject') . "' arrived at parser: " .
-            config("{$this->configBase}.parser.name")
-        );
-
-        $events         = [ ] ;
-        $xml            = simplexml_load_string($this->parsedMail->getMessageBody());
-        $timestamp      = strtotime($xml->attributes()->date);
+        $xml       = simplexml_load_string($this->parsedMail->getMessageBody());
+        $timestamp = strtotime($xml->attributes()->date);
 
         foreach ($xml->list as $reports) {
             $this->feedName = (string)$reports->attributes()->type;
 
-            if (!$this->isKnownFeed()) {
-                return $this->failed(
-                    "Detected feed {$this->feedName} is unknown."
-                );
-            }
+            // If feed is known and enabled, validate data and save report
+            if ($this->isKnownFeed() && $this->isEnabledFeed()) {
 
-            if (!$this->isEnabledFeed()) {
-                continue;
-            }
+                foreach ($reports->url_info as $report) {
+                    $url = (string)$report->attributes()->url;
+                    $ip = (string)$report->attributes()->ip;
 
-            foreach ($reports->url_info as $report) {
-                $url = (string)$report->attributes()->url;
-                $ip = (string)$report->attributes()->ip;
+                    if (!preg_match("/((http|https)\:\/\/).*/", $url, $m)) {
+                        $url = "http://${url}";
+                    }
 
-                if (!preg_match("/((http|https)\:\/\/).*/", $url, $m)) {
-                    $url = "http://${url}";
-                }
+                    $report = parse_url($url);
 
-                $report = parse_url($url);
+                    if (!filter_var($ip, FILTER_VALIDATE_IP) === true) {
+                        // IP is within the URL we need
 
-                if (!filter_var($ip, FILTER_VALIDATE_IP) === true) {
-                    // IP is within the URL we need
-
-                    if (!filter_var($report['host'], FILTER_VALIDATE_IP) === false) {
-                        $report['ip'] = $report['host'];
-                        $report['domain'] = false;
+                        if (!filter_var($report['host'], FILTER_VALIDATE_IP) === false) {
+                            $report['ip'] = $report['host'];
+                            $report['domain'] = false;
+                        } else {
+                            $report['ip'] = gethostbyname($report['host']);
+                            $report['domain'] = $report['host'];
+                        }
                     } else {
-                        $report['ip'] = gethostbyname($report['host']);
+                        $report['ip'] = $ip;
                         $report['domain'] = $report['host'];
                     }
-                } else {
-                    $report['ip'] = $ip;
-                    $report['domain'] = $report['host'];
+
+                    if (!isset($report['port']) && $report['scheme'] == 'http') {
+                        $report['port'] = 80;
+                    } elseif (!isset($report['port']) && $report['scheme'] == 'https') {
+                        $report['port'] = 443;
+                    } elseif (!isset($report['port'])) {
+                        $report['port'] = '';
+                    }
+
+                    if (!isset($report['path'])) {
+                        $report['path'] = '/';
+                    }
+
+                    // Sanity check
+                    if ($this->hasRequiredFields($report) === true) {
+                        // Event has all requirements met, filter and add!
+                        $report = $this->applyFilters($report);
+
+                        // If the domain is filled with an IP, we can keep the URI, but we dont consider it
+                        // as a domain, else we'd be using ip contacts for domain names.
+                        if (empty($report['domain']) || !filter_var($report['domain'], FILTER_VALIDATE_IP) === false) {
+                            $report['domain'] = false;
+                            $report['path'] = false;
+                        }
+
+                        $infoBlob = array(
+                            'scheme'        => $report['scheme'],
+                            'port'          => $report['port'],
+                            'domain'        => $report['domain'],
+                            'uri'           => $report['path'],
+                        );
+
+                        $this->events[] = [
+                            'source'        => config("{$this->configBase}.parser.name"),
+                            'ip'            => $report['ip'],
+                            'domain'        => $report['domain'],
+                            'uri'           => $report['path'],
+                            'class'         => config("{$this->configBase}.feeds.{$this->feedName}.class"),
+                            'type'          => config("{$this->configBase}.feeds.{$this->feedName}.type"),
+                            'timestamp'     => $timestamp,
+                            'information'   => json_encode($infoBlob),
+                        ];
+                    }
                 }
-
-                if (!isset($report['port']) && $report['scheme'] == 'http') {
-                    $report['port'] = 80;
-                } elseif (!isset($report['port']) && $report['scheme'] == 'https') {
-                    $report['port'] = 443;
-                } elseif (!isset($report['port'])) {
-                    $report['port'] = '';
-                }
-
-
-
-                if (!isset($report['path'])) {
-                    $report['path'] = '/';
-                }
-
-                if (!$this->hasRequiredFields($report)) {
-                    return $this->failed(
-                        "Required field {$this->requiredField} is missing or the config is incorrect."
-                    );
-                }
-
-                $report = $this->applyFilters($report);
-
-                // If the domain is filled with an IP, we can keep the URI, but we dont consider it
-                // as a domain, else we'd be using ip contacts for domain names.
-                if (empty($report['domain']) || !filter_var($report['domain'], FILTER_VALIDATE_IP) === false) {
-                    $report['domain'] = false;
-                    $report['path'] = false;
-                }
-
-                $infoBlob = array(
-                    'scheme'        => $report['scheme'],
-                    'port'          => $report['port'],
-                    'domain'        => $report['domain'],
-                    'uri'           => $report['path'],
-                );
-
-                $event = [
-                    'source'        => config("{$this->configBase}.parser.name"),
-                    'ip'            => $report['ip'],
-                    'domain'        => $report['domain'],
-                    'uri'           => $report['path'],
-                    'class'         => config("{$this->configBase}.feeds.{$this->feedName}.class"),
-                    'type'          => config("{$this->configBase}.feeds.{$this->feedName}.type"),
-                    'timestamp'     => $timestamp,
-                    'information'   => json_encode($infoBlob),
-                ];
-
-                $events[] = $event;
             }
-
         }
 
-        return $this->success($events);
+        return $this->success();
     }
 }
