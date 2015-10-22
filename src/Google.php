@@ -74,14 +74,15 @@ class Google extends Parser
                         // as a domain, else we'd be using ip contacts for domain names.
                         if (empty($report['domain']) || !filter_var($report['domain'], FILTER_VALIDATE_IP) === false) {
                             $report['domain'] = false;
-                            $report['path'] = false;
                         }
 
-                        $infoBlob = array(
-                            'scheme'        => $report['scheme'],
-                            'port'          => $report['port'],
-                            'domain'        => $report['domain'],
-                            'uri'           => $report['path'],
+                        $infoBlob = $this->applyFilters(
+                            array(
+                                'scheme'        => $report['scheme'],
+                                'port'          => $report['port'],
+                                'domain'        => $report['domain'],
+                                'uri'           => $report['path'],
+                            )
                         );
 
                         $this->events[] = [
