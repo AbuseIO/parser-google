@@ -1,6 +1,7 @@
 <?php
 
 namespace AbuseIO\Parsers;
+use AbuseIO\Models\Incident;
 
 /**
  * Class Google
@@ -92,16 +93,18 @@ class Google extends Parser
                             )
                         );
 
-                        $this->events[] = [
-                            'source'        => config("{$this->configBase}.parser.name"),
-                            'ip'            => $report['ip'],
-                            'domain'        => $report['domain'],
-                            'uri'           => $report['path'],
-                            'class'         => config("{$this->configBase}.feeds.{$this->feedName}.class"),
-                            'type'          => config("{$this->configBase}.feeds.{$this->feedName}.type"),
-                            'timestamp'     => $timestamp,
-                            'information'   => json_encode($infoBlob),
-                        ];
+                        $incident = new Incident();
+                        $incident->source      = config("{$this->configBase}.parser.name");
+                        $incident->source_id   = false;
+                        $incident->ip          = $report['ip'];
+                        $incident->domain      = $report['domain'];
+                        $incident->uri         = $report['path'];
+                        $incident->class       = config("{$this->configBase}.feeds.{$this->feedName}.class");
+                        $incident->type        = config("{$this->configBase}.feeds.{$this->feedName}.type");
+                        $incident->timestamp   = $timestamp;
+                        $incident->information = json_encode($infoBlob);
+
+                        $this->events[] = $incident;
                     }
                 }
             }
