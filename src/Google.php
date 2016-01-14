@@ -1,6 +1,7 @@
 <?php
 
 namespace AbuseIO\Parsers;
+
 use AbuseIO\Models\Incident;
 
 /**
@@ -75,7 +76,7 @@ class Google extends Parser
 
                     // Sanity check
                     if ($this->hasRequiredFields($report) === true) {
-                        // Event has all requirements met, filter and add!
+                        // incident has all requirements met, filter and add!
                         $report = $this->applyFilters($report);
 
                         // If the domain is filled with an IP, we can keep the URI, but we dont consider it
@@ -104,7 +105,7 @@ class Google extends Parser
                         $incident->timestamp   = $timestamp;
                         $incident->information = json_encode($infoBlob);
 
-                        $this->events[] = $incident;
+                        $this->incidents[] = $incident;
                     }
                 }
             }
