@@ -54,7 +54,12 @@ class Google extends Parser
                             $report['ip'] = $report['host'];
                             $report['domain'] = false;
                         } else {
-                            $report['ip'] = gethostbyname($report['host']);
+                            $resolved = gethostbyname($report['host']);
+                            if ($resolved != $report['host']) {
+                                $report['ip'] = gethostbyname($report['host']);
+                            } else {
+                                $report['ip'] = '127.0.0.1';
+                            }
                             $report['domain'] = $report['host'];
                         }
                     } else {
@@ -74,6 +79,17 @@ class Google extends Parser
                         $report['path'] = '/';
                     }
 
+                    if (preg_match(
+                        "/[a-z0-9\-]{1,63}\.[a-z\.]{2,6}$/",
+                        parse_url(
+                            'http://'.$report['domain'],
+                            PHP_URL_HOST
+                        ),
+                        $_domain_tld
+                    )) {
+                        $report['domain'] = $_domain_tld[0];
+                    }
+
                     // Sanity check
                     if ($this->hasRequiredFields($report) === true) {
                         // incident has all requirements met, filter and add!
@@ -91,6 +107,7 @@ class Google extends Parser
                                 'port'          => $report['port'],
                                 'domain'        => $report['domain'],
                                 'uri'           => $report['path'],
+                                'url'           => $url,
                             )
                         );
 
