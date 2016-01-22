@@ -14,7 +14,7 @@ return [
 
     'feeds' => [
         '0' => [
-            'class'     => 'Compromised website',
+            'class'     => 'COMPROMISED_WEBSITE',
             'type'      => 'Abuse',
             'enabled'   => true,
             'fields'    => [
@@ -26,7 +26,7 @@ return [
         ],
 
         '1' => [
-            'class'     => 'Phishing website',
+            'class'     => 'PHISING_WEBSITE',
             'type'      => 'Abuse',
             'enabled'   => true,
             'fields'    => [
@@ -38,7 +38,7 @@ return [
         ],
 
         '2' => [
-            'class'     => 'Distribution website',
+            'class'     => 'DISTRIBUTION_WEBSITE',
             'type'      => 'Abuse',
             'enabled'   => true,
             'fields'    => [
