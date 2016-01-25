@@ -15,7 +15,7 @@ return [
     'feeds' => [
         '0' => [
             'class'     => 'COMPROMISED_WEBSITE',
-            'type'      => 'Abuse',
+            'type'      => 'ABUSE',
             'enabled'   => true,
             'fields'    => [
                 'scheme',
@@ -27,7 +27,7 @@ return [
 
         '1' => [
             'class'     => 'PHISING_WEBSITE',
-            'type'      => 'Abuse',
+            'type'      => 'ABUSE',
             'enabled'   => true,
             'fields'    => [
                 'scheme',
@@ -39,7 +39,7 @@ return [
 
         '2' => [
             'class'     => 'DISTRIBUTION_WEBSITE',
-            'type'      => 'Abuse',
+            'type'      => 'ABUSE',
             'enabled'   => true,
             'fields'    => [
                 'scheme',
