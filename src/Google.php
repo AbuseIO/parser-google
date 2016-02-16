@@ -36,7 +36,6 @@ class Google extends Parser
 
             // If feed is known and enabled, validate data and save report
             if ($this->isKnownFeed() && $this->isEnabledFeed()) {
-
                 foreach ($reports->url_info as $report) {
                     $url = (string)$report->attributes()->url;
                     $ip = (string)$report->attributes()->ip;
