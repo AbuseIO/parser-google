@@ -44,15 +44,17 @@ class Google extends Parser
 
                     if (filter_var($ip, FILTER_VALIDATE_IP) === false) {
                         // No IP supplied by Google
-                        if (!filter_var($urlData['host'], FILTER_VALIDATE_IP) === false) {
+                        if (!empty($urlData['host']) &&
+                            !filter_var($urlData['host'], FILTER_VALIDATE_IP) === false
+                        ) {
                             // Hostname is an IP address
                             $ip = $urlData['host'];
                         } else {
                             // We have no IP address, try to get the IP address by resolving the domain
-                            $ip = gethostbyname($urlData['host']);
+                            $ip = @gethostbyname($urlData['host']);
 
                             // If it fails, set to localhost
-                            $ip = ($ip == $report['host']) ? '127.0.0.1' : $ip;
+                            $ip = ($ip == $urlData['host']) ? '127.0.0.1' : $ip;
                         }
                     }
 
