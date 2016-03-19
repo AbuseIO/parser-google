@@ -73,7 +73,6 @@ class Google extends Parser
                         $incident->source_id   = false;
                         $incident->ip          = $ip;
                         $incident->domain      = $report['domain'];
-                        $incident->uri         = $report['uri'];
                         $incident->class       = config("{$this->configBase}.feeds.{$this->feedName}.class");
                         $incident->type        = config("{$this->configBase}.feeds.{$this->feedName}.type");
                         $incident->timestamp   = $timestamp;
