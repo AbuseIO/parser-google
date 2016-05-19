@@ -59,8 +59,9 @@ class Google extends Parser
                     }
 
                     $report = [
-                        'domain' => getDomain($url),
-                        'uri' => getUri($url),
+                        'domain'    => getDomain($url),
+                        'uri'       => getUri($url),
+                        'category'  => config("{$this->configBase}.feeds.{$this->feedName}.category"),
                     ];
 
                     // Sanity check
@@ -76,7 +77,7 @@ class Google extends Parser
                         $incident->class       = config("{$this->configBase}.feeds.{$this->feedName}.class");
                         $incident->type        = config("{$this->configBase}.feeds.{$this->feedName}.type");
                         $incident->timestamp   = $timestamp;
-                        $incident->information = json_encode($urlData);
+                        $incident->information = json_encode(array_merge($urlData, $report));
 
                         $this->incidents[] = $incident;
                     }

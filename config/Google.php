@@ -26,6 +26,7 @@ return [
     'feeds' => [
         '0' => [
             'class'     => 'COMPROMISED_WEBSITE',
+            'category'  => 'Compromised Website',
             'type'      => 'ABUSE',
             'enabled'   => true,
             'fields'    => [
@@ -36,6 +37,7 @@ return [
 
         '1' => [
             'class'     => 'PHISING_WEBSITE',
+            'category'  => 'Website for Social Engineering',
             'type'      => 'ABUSE',
             'enabled'   => true,
             'fields'    => [
@@ -46,6 +48,7 @@ return [
 
         '2' => [
             'class'     => 'DISTRIBUTION_WEBSITE',
+            'category'  => 'Website for Distribution',
             'type'      => 'ABUSE',
             'enabled'   => true,
             'fields'    => [
@@ -56,6 +59,7 @@ return [
 
         '3' => [
             'class'     => 'DISTRIBUTION_WEBSITE',
+            'category'  => 'Website for Unwanted Software',
             'type'      => 'ABUSE',
             'enabled'   => true,
             'fields'    => [
@@ -66,6 +70,7 @@ return [
 
         '4' => [
             'class'     => 'DISTRIBUTION_WEBSITE',
+            'category'  => 'Website for Malicious Software',
             'type'      => 'ABUSE',
             'enabled'   => true,
             'fields'    => [
