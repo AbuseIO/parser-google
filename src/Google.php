@@ -28,7 +28,15 @@ class Google extends Parser
      */
     public function parse()
     {
-        $xml       = simplexml_load_string($this->parsedMail->getMessageBody());
+        try {
+            $xml       = simplexml_load_string($this->parsedMail->getMessageBody());
+        } catch(\Exception $e) {
+            $this->warningCount++;
+
+            return $this->failed('XML expected, but got something else. Make sure google is set to send XML based reports!');
+        }
+
+
         $timestamp = strtotime($xml->attributes()->date);
 
         foreach ($xml->list as $reports) {
