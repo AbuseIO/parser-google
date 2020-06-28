@@ -1,7 +1,7 @@
 {
     "name": "abuseio/parser-google",
     "description": "Parser addon for handling notifications from google",
-    "version": "3.0.5",
+    "version": "3.0.6",
     "keywords": ["laravel", "abuseio", "parser", "google"],
     "homepage": "http://abuse.io",
     "type": "library",
