@@ -36,7 +36,7 @@ return [
         ],
 
         '1' => [
-            'class'     => 'PHISING_WEBSITE',
+            'class'     => 'PHISHING_WEBSITE',
             'category'  => 'Website for Social Engineering',
             'type'      => 'ABUSE',
             'enabled'   => true,
